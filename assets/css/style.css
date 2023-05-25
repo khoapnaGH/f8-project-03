@@ -5,7 +5,7 @@
 @import url("./common.css");
 
 /* sections css file import */
-
+@import url("./sections/header.css");
 * {
   box-sizing: border-box;
 }

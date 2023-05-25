@@ -1,0 +1,52 @@
+.container {
+  width: 1170px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* logo */
+
+.logo {
+  display: flex;
+  column-gap: 6px;
+}
+
+.logo-image {
+  width: 30px;
+  height: 30px;
+  background: var(--btn-bg);
+  border-radius: 50%;
+  position: relative;
+}
+
+.logo-image::before {
+  content: "";
+  position: absolute;
+  top: 11px;
+  left: 11px;
+  display: block;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.logo-branch {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  row-gap: 2px;
+  color: #fff;
+}
+
+.logo-branch span:first-child {
+  font-weight: 400;
+  font-size: 1.8rem;
+  line-height: 0.78;
+}
+
+.logo-branch span:last-child {
+  font-weight: 300;
+  font-size: 1.2rem;
+  line-height: 1.12;
+}
