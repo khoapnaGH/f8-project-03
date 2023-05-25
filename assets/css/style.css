@@ -1,0 +1,25 @@
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Sora:wght@300;400;500;600;700&display=swap");
+
+/* reset css & common css */
+@import url("./reset.css");
+@import url("./common.css");
+
+/* sections css file import */
+
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --header-footer-bg: #10375c;
+  --btn-bg: #2e80ce;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+body {
+  font-size: 1.6rem;
+  font-family: "Sora", sans-serif;
+}
