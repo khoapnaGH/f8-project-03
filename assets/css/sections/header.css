@@ -2,3 +2,50 @@
   padding-top: 30px;
   background: var(--header-footer-bg);
 }
+
+/* header-top */
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar__list {
+  display: flex;
+}
+
+.action__login,
+.navbar__link {
+  padding: 4px 21px;
+  font-weight: 300;
+  font-size: 1.6rem;
+  line-height: 1.5;
+  color: #c9d2da;
+}
+
+.navbar__link--active::before {
+  content: "";
+  display: inline-block;
+  position: relative;
+  top: -2px;
+  left: -6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.navbar__link:hover,
+.navbar__link--active {
+  text-shadow: 1px 0 0 currentColor;
+  line-height: 1.5;
+  color: #ffffff;
+}
+
+.action__signup {
+  --height: 44px;
+  min-width: 104px;
+  font-size: 16px;
+  line-height: 28px;
+  font-weight: 400;
+}

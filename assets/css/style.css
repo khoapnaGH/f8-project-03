@@ -6,20 +6,3 @@
 
 /* sections css file import */
 @import url("./sections/header.css");
-* {
-  box-sizing: border-box;
-}
-
-:root {
-  --header-footer-bg: #10375c;
-  --btn-bg: #2e80ce;
-}
-
-html {
-  font-size: 62.5%;
-}
-
-body {
-  font-size: 1.6rem;
-  font-family: "Sora", sans-serif;
-}
