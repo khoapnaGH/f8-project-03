@@ -1,0 +1,68 @@
+.dentist {
+  padding: 85px 0;
+}
+
+.dentist-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dentist__heading {
+  text-align: center;
+}
+
+.dentist__link {
+  display: inline-block;
+  margin-top: 38px;
+}
+
+.dentist__content {
+  margin-top: 70px;
+}
+
+.dentist__list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  column-gap: 30px;
+}
+
+.dentist-item:hover .dentist-item__img {
+  transform: scale(1.1);
+}
+
+.dentist-item__img--bg {
+  background-color: #eaf6ff;
+  padding-top: 28px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.dentist-item__img {
+  display: block;
+  transition: 0.25s;
+}
+
+.dentist-item__name {
+  margin-top: 12px;
+  font-weight: 500;
+  font-size: 1.6rem;
+  line-height: 1.75;
+  text-align: center;
+  color: #10375c;
+}
+
+.dentist-item__title {
+  font-weight: 300;
+  font-size: 1.4rem;
+  line-height: 1.86;
+  color: #575f66;
+  text-align: center;
+}
+
+.dentist__control {
+  margin-top: 38px;
+  display: flex;
+  justify-content: center;
+  column-gap: 18px;
+}

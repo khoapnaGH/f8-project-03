@@ -66,6 +66,22 @@ a {
   color: var(--header-footer-bg);
 }
 
+.control__btn {
+  width: 36px;
+  height: 36px;
+  outline: none;
+  border: 1px solid #575f66;
+  color: #575f66;
+  border-radius: 50%;
+  background-color: #fff;
+  transition: 0.25s;
+}
+
+.control__btn:hover {
+  color: #fff;
+  background-color: #2e80ce;
+}
+
 /* logo */
 
 .logo {
