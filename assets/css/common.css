@@ -57,6 +57,14 @@ a {
   line-height: 1.67;
 }
 
+.section-heading {
+  font-weight: 600;
+  font-size: 5rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--header-footer-bg);
+}
+
 /* logo */
 
 .logo {
