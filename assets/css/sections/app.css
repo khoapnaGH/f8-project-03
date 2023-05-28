@@ -1,0 +1,37 @@
+.app {
+  padding: 170px 0 85px;
+}
+
+.app-inner {
+  background-color: var(--btn-bg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 70px;
+  column-gap: 160px;
+}
+
+.app__img {
+  width: 284px;
+  height: 522px;
+  object-fit: cover;
+  display: block;
+  margin-top: -95px;
+}
+
+.app__heading {
+  width: 489px;
+  color: #fff;
+}
+
+.app__desc {
+  margin-top: 18px;
+  color: #fff;
+}
+
+.app__install {
+  margin-top: 38px;
+  display: flex;
+  column-gap: 38px;
+  align-items: center;
+}
