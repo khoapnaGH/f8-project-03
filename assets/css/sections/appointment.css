@@ -1,0 +1,36 @@
+.appointment {
+  padding: 85px 0 170px;
+}
+
+.appointment-inner {
+  padding: 100px 0;
+  background: #f7fbff;
+  text-align: center;
+}
+
+.appointment__heading {
+  position: relative;
+}
+
+.appointment__heading::before {
+  content: "";
+  width: 136px;
+  height: 2px;
+  background: #2e80ce;
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.appointment__desc {
+  width: 617px;
+  font-size: 1.6rem;
+  line-height: 1.75;
+  margin: 38px auto 0;
+}
+
+.appointment__link {
+  display: inline-block;
+  margin-top: 38px;
+}
