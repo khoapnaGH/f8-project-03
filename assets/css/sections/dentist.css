@@ -59,10 +59,3 @@
   color: #575f66;
   text-align: center;
 }
-
-.dentist__control {
-  margin-top: 38px;
-  display: flex;
-  justify-content: center;
-  column-gap: 18px;
-}

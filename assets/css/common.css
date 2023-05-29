@@ -66,7 +66,17 @@ a {
   color: var(--header-footer-bg);
 }
 
-.control__btn {
+.section-control {
+  margin-top: 38px;
+  display: flex;
+  justify-content: center;
+  column-gap: 18px;
+}
+
+.section-control__btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 36px;
   height: 36px;
   outline: none;
@@ -75,9 +85,10 @@ a {
   border-radius: 50%;
   background-color: #fff;
   transition: 0.25s;
+  cursor: pointer;
 }
 
-.control__btn:hover {
+.section-control__btn:hover {
   color: #fff;
   background-color: #2e80ce;
 }
