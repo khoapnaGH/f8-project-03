@@ -104,10 +104,18 @@ def which(name: str) -> str | None:
     return shutil.which(name, path=str(Path(sys.executable).parent))
 
 
+def ffmpeg_works(path: str) -> bool:
+    """ffmpeg có thể tồn tại nhưng hỏng (vd. Termux lệch thư viện) — chạy thử cho chắc."""
+    try:
+        return subprocess.run([path, "-version"], capture_output=True, timeout=15).returncode == 0
+    except Exception:
+        return False
+
+
 def find_ffmpeg() -> str | None:
     """Trả về đường dẫn ffmpeg: ưu tiên ffmpeg hệ thống, sau đó imageio-ffmpeg."""
     sys_ff = which("ffmpeg")
-    if sys_ff:
+    if sys_ff and ffmpeg_works(sys_ff):
         return sys_ff
     try:
         import imageio_ffmpeg  # type: ignore

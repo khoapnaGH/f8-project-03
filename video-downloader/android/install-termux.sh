@@ -10,9 +10,34 @@ if [ -z "$TERMUX_VERSION" ] && [ ! -d /data/data/com.termux ]; then
   echo "[!] Script này chỉ dành cho Termux trên Android."; exit 1
 fi
 
-echo "==> [1/5] Cập nhật & cài gói hệ thống (python, ffmpeg, nodejs)…"
-yes | pkg update -y -o Dpkg::Options::="--force-confnew" || true
-pkg install -y -o Dpkg::Options::="--force-confnew" python ffmpeg nodejs curl termux-api
+APT_OPTS=(-y -o Dpkg::Options::="--force-confnew" -o Dpkg::Options::="--force-confdef")
+
+echo "==> [1/5] Nâng cấp toàn bộ gói Termux (bắt buộc, tránh lỗi thư viện)…"
+# Lưu ý: 'pkg update' chỉ tải danh sách gói; phải 'upgrade' toàn bộ, nếu không
+# gói mới (vd. ffmpeg) sẽ lỗi "Failed to run the 'ffmpeg' command" do lệch thư viện.
+dpkg --configure -a || true
+yes | pkg upgrade "${APT_OPTS[@]}" || true
+apt --fix-broken install "${APT_OPTS[@]}" || true
+dpkg --configure -a || true
+
+echo "    Cài python, nodejs…"
+pkg install "${APT_OPTS[@]}" python nodejs curl termux-api
+
+echo "    Cài ffmpeg…"
+ffmpeg_ok() { ffmpeg -version >/dev/null 2>&1; }
+if ! { pkg install "${APT_OPTS[@]}" ffmpeg && ffmpeg_ok; }; then
+  echo "    ffmpeg lỗi — thử nâng cấp lại toàn bộ rồi cài lại…"
+  yes | pkg upgrade "${APT_OPTS[@]}" || true
+  dpkg --configure -a || true
+  pkg reinstall "${APT_OPTS[@]}" ffmpeg || pkg install "${APT_OPTS[@]}" ffmpeg || true
+fi
+if ffmpeg_ok; then
+  echo "    ffmpeg OK"
+else
+  FFMPEG_FAILED=1
+  echo "    [!] ffmpeg vẫn lỗi. VidGrab vẫn chạy được (video thường, phụ đề, ảnh),"
+  echo "        nhưng chưa ghép được video HD / chuyển MP3. Cách sửa ở cuối."
+fi
 
 echo "==> [2/5] Cấp quyền truy cập bộ nhớ (hãy bấm CHO PHÉP nếu Android hỏi)…"
 if [ ! -d "$HOME/storage/downloads" ]; then
@@ -75,7 +100,7 @@ grep -q 'HOME/bin' "$HOME/.bashrc" 2>/dev/null || echo 'export PATH="$HOME/bin:$
 
 echo "==> [5/5] Kiểm tra…"
 python -c "import yt_dlp, flask; print('    yt-dlp', yt_dlp.version.__version__)"
-command -v ffmpeg >/dev/null && echo "    ffmpeg OK"
+ffmpeg_ok && echo "    ffmpeg OK"
 command -v node   >/dev/null && echo "    nodejs OK (dùng cho YouTube)"
 
 cat <<'MSG'
@@ -92,3 +117,14 @@ cat <<'MSG'
   • File lưu ở:    Download/VidGrab
 =====================================================
 MSG
+
+if [ -n "$FFMPEG_FAILED" ]; then
+cat <<'MSG'
+
+⚠️  ffmpeg chưa chạy được. Thử lần lượt:
+   1) termux-change-repo      (chọn một máy chủ khác, vd. Grimler / Main)
+   2) pkg upgrade -y && dpkg --configure -a && pkg reinstall ffmpeg
+   3) Kiểm tra Termux được cài từ F-Droid / GitHub, KHÔNG phải Google Play
+      (bản Google Play quá cũ, luôn bị lỗi thư viện như thế này).
+MSG
+fi
