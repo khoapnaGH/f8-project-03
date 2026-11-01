@@ -13,23 +13,29 @@ fi
 APT_OPTS=(-y -o Dpkg::Options::="--force-confnew" -o Dpkg::Options::="--force-confdef")
 
 echo "==> [1/5] Nâng cấp toàn bộ gói Termux (bắt buộc, tránh lỗi thư viện)…"
-# Lưu ý: 'pkg update' chỉ tải danh sách gói; phải 'upgrade' toàn bộ, nếu không
-# gói mới (vd. ffmpeg) sẽ lỗi "Failed to run the 'ffmpeg' command" do lệch thư viện.
-dpkg --configure -a || true
-yes | pkg upgrade "${APT_OPTS[@]}" || true
-apt --fix-broken install "${APT_OPTS[@]}" || true
-dpkg --configure -a || true
+# Dùng 'apt' trực tiếp thay vì 'pkg': 'pkg' cần curl để chọn máy chủ, mà khi Termux
+# nâng cấp dở dang thì chính curl bị lỗi "CANNOT LINK EXECUTABLE". 'apt' không cần curl.
+export DEBIAN_FRONTEND=noninteractive
+upgrade_all() {
+  dpkg --configure -a || true
+  apt-get update || true
+  apt-get full-upgrade "${APT_OPTS[@]}" || true
+  apt-get --fix-broken install "${APT_OPTS[@]}" || true
+  dpkg --configure -a || true
+}
+upgrade_all
 
 echo "    Cài python, nodejs…"
-pkg install "${APT_OPTS[@]}" python nodejs curl termux-api
+apt-get install "${APT_OPTS[@]}" python nodejs termux-api
 
 echo "    Cài ffmpeg…"
 ffmpeg_ok() { ffmpeg -version >/dev/null 2>&1; }
-if ! { pkg install "${APT_OPTS[@]}" ffmpeg && ffmpeg_ok; }; then
-  echo "    ffmpeg lỗi — thử nâng cấp lại toàn bộ rồi cài lại…"
-  yes | pkg upgrade "${APT_OPTS[@]}" || true
+if ! { apt-get install "${APT_OPTS[@]}" ffmpeg && ffmpeg_ok; }; then
+  echo "    ffmpeg lỗi — nâng cấp lại các thư viện nền rồi cài lại…"
+  apt-get install --only-upgrade "${APT_OPTS[@]}" libc++ openssl || true
+  upgrade_all
+  apt-get install --reinstall "${APT_OPTS[@]}" ffmpeg || true
   dpkg --configure -a || true
-  pkg reinstall "${APT_OPTS[@]}" ffmpeg || pkg install "${APT_OPTS[@]}" ffmpeg || true
 fi
 if ffmpeg_ok; then
   echo "    ffmpeg OK"
@@ -49,7 +55,7 @@ echo "==> [3/5] Cài thư viện Python (yt-dlp, flask)…"
 PKGS="yt-dlp yt-dlp-ejs flask mutagen"
 if ! pip install --upgrade $PKGS; then
   echo "    Thử lại với trình biên dịch…"
-  pkg install -y clang
+  apt-get install "${APT_OPTS[@]}" clang
   pip install --upgrade $PKGS
 fi
 
@@ -69,12 +75,13 @@ chmod +x "$HOME/bin/vidgrab"
 cat > "$HOME/bin/termux-url-opener" <<EOS
 #!/data/data/com.termux/files/usr/bin/bash
 SHARED="\$*"
-if ! curl -s -o /dev/null --max-time 2 http://127.0.0.1:8686/api/settings; then
+alive() { python -c 'import urllib.request as u; u.urlopen("http://127.0.0.1:8686/api/settings", timeout=1)' >/dev/null 2>&1; }
+if ! alive; then
   echo "Đang khởi động VidGrab…"
   termux-wake-lock 2>/dev/null || true
   (cd "$APP_DIR" && VIDGRAB_NO_BROWSER=1 nohup python app.py > "\$HOME/.vidgrab.log" 2>&1 &)
   for _ in \$(seq 1 30); do
-    curl -s -o /dev/null --max-time 1 http://127.0.0.1:8686/api/settings && break
+    alive && break
     sleep 0.5
   done
 fi
@@ -122,9 +129,12 @@ if [ -n "$FFMPEG_FAILED" ]; then
 cat <<'MSG'
 
 ⚠️  ffmpeg chưa chạy được. Thử lần lượt:
-   1) termux-change-repo      (chọn một máy chủ khác, vd. Grimler / Main)
-   2) pkg upgrade -y && dpkg --configure -a && pkg reinstall ffmpeg
-   3) Kiểm tra Termux được cài từ F-Droid / GitHub, KHÔNG phải Google Play
+   1) termux-change-repo      (chọn "Mirror group" → "All mirrors")
+   2) apt update && apt full-upgrade -y && dpkg --configure -a
+   3) apt install --reinstall -y ffmpeg
+   4) Kiểm tra Termux được cài từ F-Droid / GitHub, KHÔNG phải Google Play
       (bản Google Play quá cũ, luôn bị lỗi thư viện như thế này).
+   5) Vẫn lỗi: Cài đặt Android → Ứng dụng → Termux → Xoá dữ liệu, mở lại Termux
+      và chạy lại script này (bản Termux mới tinh luôn đồng bộ thư viện).
 MSG
 fi

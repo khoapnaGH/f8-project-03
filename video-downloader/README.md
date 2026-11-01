@@ -63,7 +63,7 @@ VidGrab chạy **ngay trên điện thoại** nhờ ứng dụng **Termux** (mô
    Nên cài thêm **Termux:API** (cũng trên F-Droid) để video mới hiện ngay trong Thư viện ảnh.
 2. Mở Termux, gõ từng dòng:
    ```bash
-   pkg install -y git
+   apt update && apt install -y git
    git clone https://github.com/khoapnaGH/f8-project-03.git
    bash f8-project-03/video-downloader/android/install-termux.sh
    ```
