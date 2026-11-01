@@ -111,6 +111,8 @@ chaquopy {
 dependencies {
     implementation("androidx.core:core:1.13.1")
     // ffmpeg + ffprobe đã build sẵn cho Android, cùng QuickJS và thư viện phụ (module "library")
-    implementation("io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1")
-    implementation("io.github.junkfood02.youtubedl-android:library:0.18.1")
+    // Chỉ cần các file .so bên trong, không dùng code Kotlin của họ → bỏ phụ thuộc kéo theo
+    // (tránh trùng lặp kotlin-stdlib).
+    implementation("io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1") { isTransitive = false }
+    implementation("io.github.junkfood02.youtubedl-android:library:0.18.1") { isTransitive = false }
 }
