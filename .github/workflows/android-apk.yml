@@ -86,9 +86,8 @@ jobs:
           target_commitish: ${{ github.sha }}
           make_latest: true
           body: |
-            **Tải về điện thoại** (đa số máy dùng bản `arm64-v8a`):
-            - `VidGrab-arm64.apk`: điện thoại đời 2017 trở lại đây
-            - `VidGrab-armv7.apk`: máy cũ / cấu hình yếu
+            **Tải về điện thoại** (hầu hết điện thoại dùng bản `arm64`):
+            - `VidGrab-arm64.apk`: điện thoại Android (64-bit, đa số máy từ 2017 trở lại đây)
             - `VidGrab-x86_64.apk`: giả lập Android trên máy tính
 
             Cài: mở file APK, cho phép "Cài ứng dụng không rõ nguồn gốc" nếu được hỏi.

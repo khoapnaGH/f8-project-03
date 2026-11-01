@@ -20,17 +20,14 @@ android {
         versionName = "1.0.$buildNumber"
     }
 
-    // Mỗi loại chip một APK cho nhẹ (đa số điện thoại hiện nay là arm64).
+    // Mỗi loại chip một APK cho nhẹ (điện thoại = arm64; x86_64 cho giả lập).
+    // Python 3.12 của Chaquopy chỉ có bản 64-bit nên không có APK cho máy 32-bit (armv7).
     // Chaquopy cần ndk.abiFilters nên dùng product flavor thay cho "splits".
     flavorDimensions += "abi"
     productFlavors {
         create("arm64") {
             dimension = "abi"
             ndk { abiFilters += "arm64-v8a" }
-        }
-        create("armv7") {
-            dimension = "abi"
-            ndk { abiFilters += "armeabi-v7a" }
         }
         create("x86_64") {
             dimension = "abi"
