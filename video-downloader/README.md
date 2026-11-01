@@ -53,7 +53,28 @@ sudo apt install python3 python3-venv ffmpeg   # Debian/Ubuntu
 ./run.sh
 ```
 
-## 📱 Chạy trên điện thoại Android
+## 📱 Android: cài bằng file APK (dễ nhất)
+
+1. Trên điện thoại, mở trang **Releases** của repo:
+   `https://github.com/khoapnaGH/f8-project-03/releases/latest`
+2. Tải **`VidGrab-arm64-v8a.apk`** (đa số điện thoại). Máy rất cũ thì dùng `VidGrab-armeabi-v7a.apk`.
+3. Mở file vừa tải → cho phép **Cài ứng dụng không rõ nguồn gốc** nếu được hỏi → **Cài đặt**.
+4. Mở **VidGrab**. Lần đầu mất khoảng 10–30 giây để chuẩn bị. Bấm **Cho phép** thông báo để app tải tiếp khi bạn chuyển sang app khác.
+
+Dùng: trong TikTok / Facebook / Instagram / YouTube bấm **Chia sẻ → VidGrab**, app tự mở và phân tích link.
+File lưu ở **Download/VidGrab**. Bấm ↗ để mở bằng app khác, bấm biểu tượng chia sẻ để gửi qua Zalo, Messenger…
+
+APK có sẵn ffmpeg (video HD, MP3) và QuickJS (YouTube), không cần cài thêm gì.
+Khi một trang bị lỗi tải hàng loạt: **Cài đặt → Hệ thống → Cập nhật yt-dlp**, rồi thoát hẳn app (thông báo VidGrab → **Thoát**) và mở lại.
+
+> **Cập nhật app mà không phải gỡ bản cũ:** mỗi bản APK cần được ký bằng cùng một khoá. Hãy tạo khoá một lần
+> rồi lưu vào GitHub: repo → **Settings → Secrets and variables → Actions**, thêm `VIDGRAB_KEYSTORE_BASE64`
+> (file `.jks` mã hoá base64) và `VIDGRAB_KEYSTORE_PASSWORD`. Chưa có thì mỗi bản build dùng khoá tạm,
+> nên phải gỡ VidGrab cũ trước khi cài bản mới (dữ liệu cookie trong app sẽ mất, video đã tải vẫn còn).
+
+APK được GitHub Actions tự build từ thư mục `android-app/` mỗi khi code thay đổi.
+
+## 📱 Android: chạy bằng Termux (cách cũ)
 
 VidGrab chạy **ngay trên điện thoại** nhờ ứng dụng **Termux** (môi trường Linux cho Android), không cần máy tính.
 
