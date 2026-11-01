@@ -58,7 +58,7 @@ DEFAULT_SETTINGS = {
     "download_dir": default_download_dir(),
     "cookie_browser": "",          # "" = không dùng cookie trình duyệt
     "max_concurrent": 3,
-    "filename_template": "%(title).150B [%(id)s].%(ext)s",
+    "filename_template": "%(title).120B [%(id)s].%(ext)s",
     "folder_per_platform": True,
 }
 
@@ -95,9 +95,18 @@ def download_dir() -> Path:
     return p
 
 
+def which(name: str) -> str | None:
+    """Tìm chương trình trong PATH và cả trong thư mục môi trường ảo (.venv/bin, .venv\\Scripts),
+    nơi pip cài deno — vì khi chạy .venv/python trực tiếp, thư mục đó không nằm trong PATH."""
+    found = shutil.which(name)
+    if found:
+        return found
+    return shutil.which(name, path=str(Path(sys.executable).parent))
+
+
 def find_ffmpeg() -> str | None:
     """Trả về đường dẫn ffmpeg: ưu tiên ffmpeg hệ thống, sau đó imageio-ffmpeg."""
-    sys_ff = shutil.which("ffmpeg")
+    sys_ff = which("ffmpeg")
     if sys_ff:
         return sys_ff
     try:
@@ -120,7 +129,11 @@ def available_js_runtimes() -> dict:
     except Exception:
         supported = {"deno"}
     exe = {"deno": "deno", "node": "node", "bun": "bun", "quickjs": "qjs"}
-    found = {k: {} for k in ("deno", "node", "bun", "quickjs") if k in supported and shutil.which(exe[k])}
+    found = {}
+    for k in ("deno", "node", "bun", "quickjs"):
+        path = which(exe[k]) if k in supported else None
+        if path:
+            found[k] = {"path": path}
     return found
 
 

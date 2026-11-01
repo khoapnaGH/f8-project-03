@@ -21,27 +21,37 @@ Tool chạy **trên máy của bạn** (giao diện web tại `http://127.0.0.1:
 - Giao diện tối / sáng, dùng tốt trên điện thoại, `Ctrl+V` ở bất kỳ đâu để dán & phân tích, kéo-thả link
 - Cập nhật yt-dlp bằng 1 nút (các mạng xã hội đổi cách hoạt động liên tục)
 
-## Cài đặt
+## Cài đặt trên máy tính
 
-**Yêu cầu:** Python 3.10+ · ffmpeg (khuyên cài) · Deno (khuyên cài cho YouTube)
+Chỉ cần **Python 3.10+**. Lần chạy đầu tiên, script tự tạo môi trường riêng (`.venv`) và cài mọi thứ còn lại
+(yt-dlp, ffmpeg dự phòng, Deno cho YouTube). Lần sau mở lên ngay.
 
-### Windows
-1. Cài [Python](https://www.python.org/downloads/) (nhớ tick **Add Python to PATH**)
-2. Cài ffmpeg và Deno (mở PowerShell):
-   ```powershell
-   winget install Gyan.FFmpeg
-   winget install DenoLand.Deno
-   ```
-3. Nhấp đúp **`run.bat`** → trình duyệt tự mở VidGrab.
+### 🪟 Windows 10 / 11
+1. Tải code về: trên GitHub bấm **Code → Download ZIP**, rồi giải nén.
+2. Mở thư mục `video-downloader`, **bấm đúp `run.bat`**.
+   - Chưa có Python? Script sẽ hỏi có cài tự động bằng `winget` không: bấm **Y**.
+     (Hoặc tự cài từ [python.org](https://www.python.org/downloads/) và tick **Add python.exe to PATH**.)
+   - Windows SmartScreen cảnh báo thì bấm **More info → Run anyway**.
+3. Trình duyệt tự mở VidGrab. Muốn tắt thì đóng cửa sổ đen.
 
-### macOS / Linux
+*Tuỳ chọn:* `winget install Gyan.FFmpeg` nếu muốn ffmpeg đầy đủ (app đã có sẵn ffmpeg dự phòng).
+
+### 🍎 macOS (Intel & Apple Silicon)
+1. Cài Python 3.10+ từ [python.org](https://www.python.org/downloads/macos/) hoặc `brew install python`.
+   (Python có sẵn của macOS là 3.9, **quá cũ**. Nếu máy có Homebrew, script sẽ hỏi để cài giúp.)
+2. Tải code về và giải nén, mở thư mục `video-downloader`, **bấm đúp `VidGrab.command`**.
+   - Lần đầu macOS báo *"không thể mở vì không xác định được nhà phát triển"*: **chuột phải → Mở → Mở**.
+   - Nếu vẫn bị chặn, mở Terminal và chạy: `xattr -dr com.apple.quarantine ~/Downloads/f8-project-03-*/video-downloader`
+3. Trình duyệt tự mở VidGrab. Muốn tắt thì đóng cửa sổ Terminal.
+
+*Tuỳ chọn:* `brew install ffmpeg`.
+Đọc cookie trực tiếp từ Safari cần cấp quyền **Full Disk Access** cho Terminal; dùng file cookies.txt thì không cần.
+
+### 🐧 Linux
 ```bash
-brew install ffmpeg deno          # macOS  (Linux: sudo apt install ffmpeg; curl -fsSL https://deno.land/install.sh | sh)
+sudo apt install python3 python3-venv ffmpeg   # Debian/Ubuntu
 ./run.sh
 ```
-
-> Không cài được ffmpeg? App sẽ tự dùng ffmpeg đi kèm gói `imageio-ffmpeg`.
-> YouTube hiện yêu cầu một JS runtime (Deno/Node) để giải mã link — nếu YouTube báo lỗi, hãy cài Deno.
 
 ## 📱 Chạy trên điện thoại Android
 
