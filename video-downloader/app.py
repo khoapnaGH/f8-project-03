@@ -29,21 +29,27 @@ import yt_dlp
 from yt_dlp.utils import DownloadCancelled
 
 BASE_DIR = Path(__file__).resolve().parent
-STATIC_DIR = BASE_DIR / "static"
-COOKIES_DIR = BASE_DIR / "cookies"
-SETTINGS_FILE = BASE_DIR / "settings.json"
-HISTORY_FILE = BASE_DIR / "history.json"
+# Bản APK Android truyền các thư mục qua biến môi trường (xem android-app/)
+STATIC_DIR = Path(os.environ.get("VIDGRAB_STATIC_DIR") or BASE_DIR / "static")
+DATA_DIR = Path(os.environ.get("VIDGRAB_DATA_DIR") or BASE_DIR)
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+COOKIES_DIR = DATA_DIR / "cookies"
+SETTINGS_FILE = DATA_DIR / "settings.json"
+HISTORY_FILE = DATA_DIR / "history.json"
+IS_APK = os.environ.get("VIDGRAB_APK") == "1"
 
 COOKIES_DIR.mkdir(exist_ok=True)
 
 PLATFORMS = ["youtube", "facebook", "instagram", "tiktok"]
 SUPPORTED_BROWSERS = ["chrome", "edge", "firefox", "brave", "opera", "vivaldi", "chromium", "safari", "whale"]
 
-IS_ANDROID = bool(os.environ.get("TERMUX_VERSION") or hasattr(sys, "getandroidapilevel")
+IS_ANDROID = bool(IS_APK or os.environ.get("TERMUX_VERSION") or hasattr(sys, "getandroidapilevel")
                   or os.path.isdir("/data/data/com.termux"))
 
 
 def default_download_dir() -> str:
+    if os.environ.get("VIDGRAB_DOWNLOAD_DIR"):
+        return os.environ["VIDGRAB_DOWNLOAD_DIR"]
     if IS_ANDROID:
         # sau khi chạy `termux-setup-storage`, ~/storage/downloads trỏ tới thư mục Download của máy
         for cand in (Path.home() / "storage" / "downloads", Path("/sdcard/Download"),
@@ -114,6 +120,9 @@ def ffmpeg_works(path: str) -> bool:
 
 def find_ffmpeg() -> str | None:
     """Trả về đường dẫn ffmpeg: ưu tiên ffmpeg hệ thống, sau đó imageio-ffmpeg."""
+    env_ff = os.environ.get("VIDGRAB_FFMPEG")   # APK: libffmpeg.so đi kèm app
+    if env_ff and ffmpeg_works(env_ff):
+        return env_ff
     sys_ff = which("ffmpeg")
     if sys_ff and ffmpeg_works(sys_ff):
         return sys_ff
@@ -138,7 +147,12 @@ def available_js_runtimes() -> dict:
         supported = {"deno"}
     exe = {"deno": "deno", "node": "node", "bun": "bun", "quickjs": "qjs"}
     found = {}
+    qjs = os.environ.get("VIDGRAB_QJS")   # APK: QuickJS đi kèm app
+    if qjs and "quickjs" in supported and os.path.exists(qjs):
+        found["quickjs"] = {"path": qjs}
     for k in ("deno", "node", "bun", "quickjs"):
+        if k in found:
+            continue
         path = which(exe[k]) if k in supported else None
         if path:
             found[k] = {"path": path}
@@ -528,8 +542,18 @@ def android_visible_path(p: Path) -> str:
 
 
 def android_media_scan(paths: list[Path]) -> None:
-    """Cho file mới hiện ngay trong Thư viện ảnh / Nhạc (cần gói termux-api)."""
-    if not IS_ANDROID or not shutil.which("termux-media-scan") or not paths:
+    """Cho file mới hiện ngay trong Thư viện ảnh / Nhạc (Termux: cần gói termux-api)."""
+    if not IS_ANDROID or not paths:
+        return
+    if IS_APK:
+        try:
+            from java import jclass  # type: ignore  # Chaquopy
+
+            jclass("com.vidgrab.app.Bridge").scanFiles([str(p) for p in paths])
+        except Exception:
+            traceback.print_exc()
+        return
+    if not shutil.which("termux-media-scan"):
         return
     try:
         subprocess.Popen(["termux-media-scan", *map(str, paths)],
@@ -539,7 +563,8 @@ def android_media_scan(paths: list[Path]) -> None:
 
 
 def staging_dir(job: Job) -> Path:
-    return download_dir() / ".vidgrab-tmp" / job.id
+    base = os.environ.get("VIDGRAB_STAGING_DIR")
+    return (Path(base) if base else download_dir() / ".vidgrab-tmp") / job.id
 
 
 def move_staged_files(job: Job) -> list[dict]:
@@ -993,6 +1018,7 @@ def api_get_settings():
         python=sys.version.split()[0],
         os="Android" if IS_ANDROID else platform.system(),
         android=IS_ANDROID,
+        apk=IS_APK,
         js_runtime=", ".join(JS_RUNTIMES) or "",
     )
 
@@ -1080,8 +1106,37 @@ def json_cookies_to_netscape(raw: str) -> str:
         return ""
 
 
+def update_ytdlp_wheel() -> tuple[bool, str, str]:
+    """APK không có pip: tải bản wheel yt-dlp mới nhất từ PyPI vào DATA_DIR/updates.
+    Lần khởi động sau, wheel được đặt đầu sys.path (Python import thẳng từ file .whl/zip)."""
+    import hashlib
+
+    with urllib.request.urlopen("https://pypi.org/pypi/yt-dlp/json", timeout=30) as r:
+        meta = json.load(r)
+    latest = meta["info"]["version"]
+    if latest == yt_dlp.version.__version__:
+        return True, f"Đang dùng bản mới nhất ({latest}).", ""
+    wheel = next(u for u in meta["urls"] if u["filename"].endswith("-py3-none-any.whl"))
+    with urllib.request.urlopen(wheel["url"], timeout=120) as r:
+        data = r.read()
+    if hashlib.sha256(data).hexdigest() != wheel["digests"]["sha256"]:
+        return False, "File tải về bị lỗi (sai checksum), hãy thử lại.", ""
+    upd = DATA_DIR / "updates"
+    upd.mkdir(exist_ok=True)
+    tmp = upd / "yt_dlp.whl.tmp"
+    tmp.write_bytes(data)
+    os.replace(tmp, upd / "yt_dlp.whl")
+    return True, f"Đã tải yt-dlp {latest}. Hãy thoát hẳn VidGrab rồi mở lại để áp dụng.", wheel["filename"]
+
+
 @app.post("/api/update-ytdlp")
 def api_update():
+    if IS_APK:
+        try:
+            ok, msg, out = update_ytdlp_wheel()
+            return jsonify(ok=ok, message=msg, output=out)
+        except Exception as e:  # noqa: BLE001
+            return jsonify(ok=False, message=f"Cập nhật thất bại: {e}"), 500
     try:
         out = subprocess.run(
             [sys.executable, "-m", "pip", "install", "-U",

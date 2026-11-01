@@ -14,7 +14,13 @@
     other: { name: "Web", color: "#7c5cff", icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>' },
   };
 
+  // Cầu nối với app Android (APK) — chỉ tồn tại khi chạy trong WebView của VidGrab
+  const NATIVE = window.VidGrabAndroid || null;
+  const absPath = (rel) => `${state.settings?.settings?.download_dir || ""}/${rel}`;
+
   const ICON = {
+    share: '<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>',
+    open: '<svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>',
     play: '<svg viewBox="0 0 24 24"><path d="m7 4 13 8-13 8z"/></svg>',
     download: '<svg viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>',
     folder: '<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
@@ -138,7 +144,7 @@
 
   $("#btnPaste").onclick = async () => {
     try {
-      const t = await navigator.clipboard.readText();
+      const t = NATIVE ? NATIVE.getClipboard() : await navigator.clipboard.readText();
       if (!t) return toast("Clipboard trống", "warn");
       urlInput.value = extractUrl(t) || t.trim();
       updateDetected();
@@ -594,7 +600,10 @@
       return `<span class="file-chip" title="${esc(f.path)}">${fileIcon(f.kind)}
         <span class="fn">${esc(f.name)}</span><span class="fs">${esc(f.size)}</span>
         ${canView ? `<button data-act="view" data-path="${esc(f.path)}" data-kind="${f.kind}" title="Xem">${f.kind === "subtitle" ? ICON.text : ICON.play}</button>` : ""}
-        <a href="${fileUrl(f.path, true)}" title="Lưu về máy (qua trình duyệt)">${ICON.download}</a>
+        ${NATIVE
+          ? `<button data-act="nopen" data-path="${esc(f.path)}" title="Mở bằng ứng dụng khác">${ICON.open}</button>
+             <button data-act="nshare" data-path="${esc(f.path)}" title="Chia sẻ (Zalo, Messenger…)">${ICON.share}</button>`
+          : `<a href="${fileUrl(f.path, true)}" title="Lưu về máy (qua trình duyệt)">${ICON.download}</a>`}
         ${state.settings?.android ? "" : `<button data-act="reveal" data-path="${esc(f.path)}" title="Mở thư mục chứa file">${ICON.folder}</button>`}
       </span>`;
     }).join("");
@@ -669,6 +678,8 @@
       if (act === "remove") { await api(`/api/jobs/${id}`, { method: "DELETE" }); }
       if (act === "reveal") { await api("/api/open-folder", { method: "POST", body: { path: b.dataset.path } }); }
       if (act === "view") previewFile(b.dataset.path, b.dataset.kind);
+      if (act === "nopen" && NATIVE) NATIVE.openFile(absPath(b.dataset.path));
+      if (act === "nshare" && NATIVE) NATIVE.shareFile(absPath(b.dataset.path));
       pollJobs(true);
     } catch (err) { toast(err.message, "err"); }
   });

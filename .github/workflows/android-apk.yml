@@ -1,0 +1,97 @@
+name: Build VidGrab APK
+
+on:
+  push:
+    branches: [main, master, "claude/**"]
+    paths:
+      - "android-app/**"
+      - "video-downloader/app.py"
+      - "video-downloader/static/**"
+      - ".github/workflows/android-apk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # Chaquopy cần Python cùng phiên bản với Python trong app để cài thư viện
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+
+      # Khoá ký APK lấy từ GitHub Secrets để bản cập nhật cài đè được lên bản cũ.
+      # Chưa có secret thì tạo khoá tạm (mỗi bản build một khoá → phải gỡ app cũ trước khi cài).
+      - name: Prepare signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.VIDGRAB_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.VIDGRAB_KEYSTORE_PASSWORD }}
+        run: |
+          KS="$RUNNER_TEMP/vidgrab.jks"
+          if [ -n "$KEYSTORE_B64" ] && [ -n "$KEYSTORE_PASSWORD" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$KS"
+            PASS="$KEYSTORE_PASSWORD"
+            echo "SIGNING_NOTE=Ký bằng khoá cố định (cài đè được lên bản cũ)." >> "$GITHUB_ENV"
+          else
+            PASS="$(openssl rand -hex 16)"
+            keytool -genkeypair -keystore "$KS" -storetype PKCS12 -alias vidgrab -keyalg RSA \
+              -keysize 2048 -validity 10000 -storepass "$PASS" -keypass "$PASS" -dname "CN=VidGrab"
+            echo "SIGNING_NOTE=⚠️ Ký bằng khoá tạm: nếu đã cài bản VidGrab cũ, hãy gỡ bản cũ trước khi cài." >> "$GITHUB_ENV"
+          fi
+          echo "::add-mask::$PASS"
+          echo "VIDGRAB_KEYSTORE_FILE=$KS" >> "$GITHUB_ENV"
+          echo "VIDGRAB_KEYSTORE_PASSWORD=$PASS" >> "$GITHUB_ENV"
+
+      - name: Build APK
+        working-directory: android-app
+        run: gradle assembleRelease --stacktrace --no-daemon
+
+      - name: Collect APKs
+        run: |
+          mkdir -p dist
+          for f in android-app/app/build/outputs/apk/release/*.apk; do
+            abi=$(basename "$f" | sed -E 's/app-(.*)-release\.apk/\1/')
+            cp "$f" "dist/VidGrab-${abi}.apk"
+          done
+          ls -la dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VidGrab-apk
+          path: dist/*.apk
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: vidgrab-android-v1.0.${{ github.run_number }}
+          name: VidGrab Android 1.0.${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          make_latest: true
+          body: |
+            **Tải về điện thoại** (đa số máy dùng bản `arm64-v8a`):
+            - `VidGrab-arm64-v8a.apk`: điện thoại đời 2017 trở lại đây
+            - `VidGrab-armeabi-v7a.apk`: máy cũ / cấu hình yếu
+            - `VidGrab-x86_64.apk`: giả lập Android trên máy tính
+
+            Cài: mở file APK, cho phép "Cài ứng dụng không rõ nguồn gốc" nếu được hỏi.
+
+            ${{ env.SIGNING_NOTE }}
+          files: dist/*.apk
