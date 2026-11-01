@@ -81,7 +81,13 @@ val copyPythonApp by tasks.registering(Copy::class) {
     from(File(webDir, "app.py"))
     into(layout.buildDirectory.dir("generated/vidgrab-python"))
 }
-tasks.named("preBuild") { dependsOn(copyWebAssets, copyPythonApp) }
+// Mọi task khác đều có thể đọc 2 thư mục sinh ra ở trên (gộp mã Python, assets, lint…)
+// nên cho tất cả chạy sau 2 task sao chép này.
+tasks.configureEach {
+    if (name != "copyWebAssets" && name != "copyPythonApp") {
+        dependsOn(copyWebAssets, copyPythonApp)
+    }
+}
 
 chaquopy {
     defaultConfig {
