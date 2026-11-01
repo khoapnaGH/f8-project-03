@@ -595,7 +595,7 @@
         <span class="fn">${esc(f.name)}</span><span class="fs">${esc(f.size)}</span>
         ${canView ? `<button data-act="view" data-path="${esc(f.path)}" data-kind="${f.kind}" title="Xem">${f.kind === "subtitle" ? ICON.text : ICON.play}</button>` : ""}
         <a href="${fileUrl(f.path, true)}" title="Lưu về máy (qua trình duyệt)">${ICON.download}</a>
-        <button data-act="reveal" data-path="${esc(f.path)}" title="Mở thư mục chứa file">${ICON.folder}</button>
+        ${state.settings?.android ? "" : `<button data-act="reveal" data-path="${esc(f.path)}" title="Mở thư mục chứa file">${ICON.folder}</button>`}
       </span>`;
     }).join("");
 
@@ -761,13 +761,16 @@
     $("#setConc").value = s.settings.max_concurrent;
     $("#setPerPf").checked = !!s.settings.folder_per_platform;
 
+    document.body.classList.toggle("is-android", !!s.android);
+    $("#btnFolder").classList.toggle("hidden", !!s.android);
+    $$("[data-act=reveal]").forEach((b) => b.classList.toggle("hidden", !!s.android));
     const any = Object.values(s.cookies).some((c) => c.exists) || !!s.settings.cookie_browser;
     $("#cookieDot").classList.toggle("on", any);
 
     $("#sysInfo").innerHTML = [
       ["yt-dlp", s.ytdlp_version, true],
       ["ffmpeg", s.ffmpeg || "Chưa cài — không ghép được video HD / MP3", !!s.ffmpeg],
-      ["JS runtime (deno/node — YouTube cần)", s.js_runtime ? "Có" : "Chưa có — nên cài Deno", s.js_runtime],
+      ["JS runtime (deno/node — YouTube cần)", s.js_runtime || (s.android ? "Chưa có — chạy: pkg install nodejs" : "Chưa có — nên cài Deno"), !!s.js_runtime],
       ["Python / Hệ điều hành", `${s.python} · ${s.os}`, true],
     ].map(([k, v, ok]) => `<div class="sys"><div class="k">${k}</div><div class="v ${ok ? "ok" : "bad"}">${esc(v)}</div></div>`).join("");
     $("#footVer").textContent = `yt-dlp ${s.ytdlp_version}`;
@@ -899,6 +902,32 @@
   loadSettings().catch(() => toast("Không kết nối được máy chủ VidGrab. Hãy chạy app.py", "err", 8000));
   pollJobs();
   urlInput.focus();
-  const qs = new URLSearchParams(location.search).get("url");
-  if (qs) { urlInput.value = qs; updateDetected(); analyze(); }
+  // link được truyền vào qua ?url= hoặc qua nút "Chia sẻ" của Android (share_target: url/text/title)
+  const params = new URLSearchParams(location.search);
+  const shared = ["url", "text", "title"].map((k) => extractUrl(params.get(k) || "")).find(Boolean);
+  if (shared) {
+    urlInput.value = shared;
+    updateDetected();
+    history.replaceState(null, "", "/");
+    analyze();
+  }
+
+  // PWA: cài ra màn hình chính
+  if ("serviceWorker" in navigator && window.isSecureContext) {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  }
+  let installPrompt = null;
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    installPrompt = e;
+    $("#btnInstall").classList.remove("hidden");
+  });
+  $("#btnInstall").onclick = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    await installPrompt.userChoice;
+    installPrompt = null;
+    $("#btnInstall").classList.add("hidden");
+  };
+  window.addEventListener("appinstalled", () => toast("Đã cài VidGrab! Giờ bạn có thể bấm Chia sẻ → VidGrab từ TikTok, Facebook…", "ok", 6000));
 })();

@@ -57,6 +57,7 @@ code, .mono { font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospac
 code { background: var(--card-hover); padding: 1px 6px; border-radius: 6px; }
 svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 .hidden { display: none !important; }
+.is-android .pc-only { display: none !important; }
 .muted { color: var(--muted); }
 .small { font-size: 12.5px; }
 u { text-decoration-color: var(--primary2); text-underline-offset: 3px; }

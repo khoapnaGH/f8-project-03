@@ -43,6 +43,40 @@ brew install ffmpeg deno          # macOS  (Linux: sudo apt install ffmpeg; curl
 > Không cài được ffmpeg? App sẽ tự dùng ffmpeg đi kèm gói `imageio-ffmpeg`.
 > YouTube hiện yêu cầu một JS runtime (Deno/Node) để giải mã link — nếu YouTube báo lỗi, hãy cài Deno.
 
+## 📱 Chạy trên điện thoại Android
+
+VidGrab chạy **ngay trên điện thoại** nhờ ứng dụng **Termux** (môi trường Linux cho Android), không cần máy tính.
+
+### Cài đặt (làm 1 lần, ~5 phút, cần Wi-Fi)
+1. Cài **Termux** từ [F-Droid](https://f-droid.org/packages/com.termux/) hoặc [GitHub](https://github.com/termux/termux-app/releases)
+   (⚠️ **không** dùng bản trên Google Play, bản đó đã cũ và lỗi).
+   Nên cài thêm **Termux:API** (cũng trên F-Droid) để video mới hiện ngay trong Thư viện ảnh.
+2. Mở Termux, gõ từng dòng:
+   ```bash
+   pkg install -y git
+   git clone https://github.com/khoapnaGH/f8-project-03.git
+   bash f8-project-03/video-downloader/android/install-termux.sh
+   ```
+   Android hỏi quyền truy cập bộ nhớ thì bấm **Cho phép**.
+   *(Repo riêng tư? Tải ZIP từ GitHub về máy, rồi trong Termux: `termux-setup-storage`, `cd ~/storage/downloads`, `unzip f8-project-03-*.zip`, sau đó chạy script trong thư mục vừa giải nén.)*
+
+### Sử dụng
+| Việc | Cách làm |
+|---|---|
+| Mở VidGrab | Mở Termux, gõ `vidgrab` (Chrome sẽ tự mở giao diện) |
+| **Tải nhanh từ app** | Trong TikTok / Facebook / Instagram / YouTube bấm **Chia sẻ → Termux**: VidGrab tự khởi động và phân tích link |
+| Cài như app thật | Trong Chrome bấm nút **Cài app** trên thanh trên cùng (hoặc ⋮ → *Thêm vào màn hình chính*). Sau đó còn chọn được **Chia sẻ → VidGrab** (khi Termux đang chạy `vidgrab`) |
+| Tắt | Gõ `vidgrab-stop`, hoặc vuốt tắt thông báo Termux |
+| File tải về | Thư mục **Download/VidGrab**, mở bằng ứng dụng Tệp / Thư viện |
+| Cookie (story, private) | Xuất `cookies.txt` trên máy tính (xem phần dưới), gửi sang điện thoại, rồi vào **Cài đặt → Cookie → Nạp file** |
+
+> Mẹo: khi tải file lớn, đừng vuốt tắt Termux. Script đã bật *wake-lock* để máy không ngắt khi màn hình tắt.
+
+### Cách khác: dùng điện thoại điều khiển VidGrab trên máy tính
+Chạy trên máy tính với `VIDGRAB_HOST=0.0.0.0` (Windows: `set VIDGRAB_HOST=0.0.0.0` rồi `run.bat`).
+Màn hình sẽ in địa chỉ dạng `http://192.168.x.x:8686`; mở địa chỉ đó trên điện thoại (cùng Wi-Fi).
+File được tải về máy tính; bấm nút ⬇ cạnh file để lưu sang điện thoại.
+
 ## Tải nội dung riêng tư / story
 Story và video riêng tư chỉ xem được khi đăng nhập, nên VidGrab dùng **cookie của chính tài khoản bạn** — chỉ tải được những gì tài khoản đó **được phép xem** (đã follow, đã vào nhóm…).
 

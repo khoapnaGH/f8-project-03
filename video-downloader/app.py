@@ -39,8 +39,23 @@ COOKIES_DIR.mkdir(exist_ok=True)
 PLATFORMS = ["youtube", "facebook", "instagram", "tiktok"]
 SUPPORTED_BROWSERS = ["chrome", "edge", "firefox", "brave", "opera", "vivaldi", "chromium", "safari", "whale"]
 
+IS_ANDROID = bool(os.environ.get("TERMUX_VERSION") or hasattr(sys, "getandroidapilevel")
+                  or os.path.isdir("/data/data/com.termux"))
+
+
+def default_download_dir() -> str:
+    if IS_ANDROID:
+        # sau khi chạy `termux-setup-storage`, ~/storage/downloads trỏ tới thư mục Download của máy
+        for cand in (Path.home() / "storage" / "downloads", Path("/sdcard/Download"),
+                     Path("/storage/emulated/0/Download")):
+            if cand.is_dir() and os.access(cand, os.W_OK):
+                return str(cand / "VidGrab")
+        return str(Path.home() / "VidGrab")
+    return str(Path.home() / "Downloads" / "VidGrab")
+
+
 DEFAULT_SETTINGS = {
-    "download_dir": str(Path.home() / "Downloads" / "VidGrab"),
+    "download_dir": default_download_dir(),
     "cookie_browser": "",          # "" = không dùng cookie trình duyệt
     "max_concurrent": 3,
     "filename_template": "%(title).150B [%(id)s].%(ext)s",
@@ -96,6 +111,22 @@ def find_ffmpeg() -> str | None:
 FFMPEG = find_ffmpeg()
 
 
+def available_js_runtimes() -> dict:
+    """YouTube cần JS runtime để giải mã link. Bật mọi runtime có sẵn (Android thường chỉ có node)."""
+    try:
+        from yt_dlp.globals import supported_js_runtimes
+
+        supported = set(supported_js_runtimes.value.keys())
+    except Exception:
+        supported = {"deno"}
+    exe = {"deno": "deno", "node": "node", "bun": "bun", "quickjs": "qjs"}
+    found = {k: {} for k in ("deno", "node", "bun", "quickjs") if k in supported and shutil.which(exe[k])}
+    return found
+
+
+JS_RUNTIMES = available_js_runtimes()
+
+
 def detect_platform(url: str) -> str:
     host = urllib.parse.urlparse(url).netloc.lower()
     if any(h in host for h in ("youtube.com", "youtu.be", "youtube-nocookie.com")):
@@ -146,13 +177,9 @@ def base_opts(url: str, use_cookies: bool = True) -> dict:
         "retries": 5,
         "fragment_retries": 10,
         "concurrent_fragment_downloads": 4,
-        "http_headers": {
-            "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/130.0 Safari/537.36"
-            )
-        },
     }
+    if JS_RUNTIMES:
+        opts["js_runtimes"] = JS_RUNTIMES
     if FFMPEG:
         opts["ffmpeg_location"] = FFMPEG
     opts.update(cookie_opts(url, use_cookies))
@@ -471,6 +498,25 @@ class JobLogger:
         self.errors.append(str(msg))
 
 
+def android_visible_path(p: Path) -> str:
+    s = str(p)
+    for prefix in (str(Path.home() / "storage" / "downloads"), "/storage/emulated/0/Download", "/sdcard/Download"):
+        if s.startswith(prefix):
+            return "Download" + s[len(prefix):]
+    return s
+
+
+def android_media_scan(paths: list[Path]) -> None:
+    """Cho file mới hiện ngay trong Thư viện ảnh / Nhạc (cần gói termux-api)."""
+    if not IS_ANDROID or not shutil.which("termux-media-scan") or not paths:
+        return
+    try:
+        subprocess.Popen(["termux-media-scan", *map(str, paths)],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception:
+        pass
+
+
 def staging_dir(job: Job) -> Path:
     return download_dir() / ".vidgrab-tmp" / job.id
 
@@ -502,6 +548,7 @@ def move_staged_files(job: Job) -> list[dict]:
             })
     order = {"video": 0, "audio": 1, "image": 2, "subtitle": 3, "other": 4}
     moved.sort(key=lambda f: (order[f["kind"]], f["name"]))
+    android_media_scan([root / f["path"] for f in moved])
     return moved
 
 
@@ -680,6 +727,18 @@ def index():
     return send_from_directory(STATIC_DIR, "index.html")
 
 
+@app.get("/manifest.webmanifest")
+def manifest():
+    return send_from_directory(STATIC_DIR, "manifest.webmanifest", mimetype="application/manifest+json")
+
+
+@app.get("/sw.js")
+def service_worker():
+    resp = send_from_directory(STATIC_DIR, "sw.js", mimetype="text/javascript")
+    resp.headers["Cache-Control"] = "no-cache"
+    return resp
+
+
 @app.post("/api/info")
 def api_info():
     body = request.get_json(force=True) or {}
@@ -819,6 +878,8 @@ def api_open_folder():
     target = download_dir()
     if body.get("path"):
         target = _safe_path(body["path"])
+    if IS_ANDROID:
+        return jsonify(error=f"Trên Android: mở ứng dụng Tệp / File Manager → {android_visible_path(target)}"), 400
     try:
         system = platform.system()
         if system == "Windows":
@@ -909,8 +970,9 @@ def api_get_settings():
         ffmpeg=FFMPEG,
         ytdlp_version=yt_dlp.version.__version__,
         python=sys.version.split()[0],
-        os=platform.system(),
-        js_runtime=bool(shutil.which("deno") or shutil.which("node") or shutil.which("bun")),
+        os="Android" if IS_ANDROID else platform.system(),
+        android=IS_ANDROID,
+        js_runtime=", ".join(JS_RUNTIMES) or "",
     )
 
 
@@ -1001,7 +1063,8 @@ def json_cookies_to_netscape(raw: str) -> str:
 def api_update():
     try:
         out = subprocess.run(
-            [sys.executable, "-m", "pip", "install", "-U", "yt-dlp[default]"],
+            [sys.executable, "-m", "pip", "install", "-U",
+             *(["yt-dlp", "yt-dlp-ejs"] if IS_ANDROID else ["yt-dlp[default]"])],
             capture_output=True, text=True, timeout=300,
         )
         ok = out.returncode == 0
@@ -1013,6 +1076,26 @@ def api_update():
 
 
 # --------------------------------------------------------------------------- #
+def lan_ip() -> str:
+    import socket
+
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("10.255.255.255", 1))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return ""
+
+
+def open_browser(url: str) -> None:
+    if IS_ANDROID and shutil.which("termux-open-url"):
+        subprocess.Popen(["termux-open-url", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    else:
+        webbrowser.open(url)
+
+
 def main():
     load_history()
     host = os.environ.get("VIDGRAB_HOST", "127.0.0.1")
@@ -1020,12 +1103,15 @@ def main():
     url = f"http://{'127.0.0.1' if host in ('0.0.0.0', '') else host}:{port}"
     print("=" * 56)
     print("  VidGrab đang chạy tại:", url)
+    if host in ("0.0.0.0", "") and lan_ip():
+        print(f"  Từ điện thoại (cùng Wi-Fi):  http://{lan_ip()}:{port}")
     print("  Thư mục tải về:", download_dir())
     print("  ffmpeg:", FFMPEG or "KHÔNG TÌM THẤY (cần để ghép video HD / mp3)")
+    print("  JS runtime (YouTube):", ", ".join(JS_RUNTIMES) or "KHÔNG CÓ (cài deno hoặc nodejs)")
     print("  Nhấn Ctrl+C để thoát")
     print("=" * 56)
     if os.environ.get("VIDGRAB_NO_BROWSER") != "1":
-        threading.Timer(1.2, lambda: webbrowser.open(url)).start()
+        threading.Timer(1.2, lambda: open_browser(url)).start()
     app.run(host=host, port=port, debug=False, threaded=True)
 
 

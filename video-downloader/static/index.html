@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>VidGrab · Tải video, story & phụ đề</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%237c5cff'/><stop offset='1' stop-color='%23ff4d8d'/></linearGradient></defs><rect width='64' height='64' rx='16' fill='url(%23g)'/><path d='M32 14v26m0 0-10-10m10 10 10-10M18 48h28' stroke='white' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>" />
+  <meta name="theme-color" content="#0b0b14" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/static/icons/icon-192.png" />
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
@@ -22,6 +26,9 @@
       </div>
     </div>
     <div class="top-actions">
+      <button class="btn btn-ghost btn-sm hidden" id="btnInstall" title="Cài VidGrab ra màn hình chính">
+        <svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M12 7v7m0 0-3-3m3 3 3-3"/></svg>Cài app
+      </button>
       <button class="icon-btn" id="btnFolder" title="Mở thư mục tải về">
         <svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
       </button>
@@ -323,8 +330,8 @@
           <div class="label">Cách 1 · Nạp file cookies.txt (khuyên dùng)</div>
           <div class="cookie-grid" id="cookieGrid"></div>
 
-          <div class="label">Cách 2 · Đọc cookie trực tiếp từ trình duyệt</div>
-          <div class="row">
+          <div class="label pc-only">Cách 2 · Đọc cookie trực tiếp từ trình duyệt</div>
+          <div class="row pc-only">
             <select id="setBrowser" class="select"></select>
             <span class="muted small">Dùng khi chưa nạp file. Firefox hoạt động ổn định nhất; Chrome/Edge cần đóng trình duyệt trước khi tải.</span>
           </div>
@@ -383,6 +390,13 @@
           <li>Trong VidGrab: <b>Cài đặt → Cookie</b> → bấm <b>Nạp file</b> ở đúng nền tảng (hoặc kéo-thả file vào ô).</li>
           <li>Dán link story / video riêng tư và bấm <b>Phân tích</b>. Xong!</li>
         </ol>
+        <div class="label">📱 Trên điện thoại Android</div>
+        <ul class="steps">
+          <li><b>Lấy cookie:</b> cách dễ nhất là xuất file cookies.txt trên máy tính (các bước ở trên) rồi gửi sang điện thoại qua Zalo / Drive / cáp, sau đó vào <b>Cài đặt → Cookie → Nạp file</b> và chọn file đó.</li>
+          <li>Hoặc dùng <b>Firefox cho Android</b>, cài add-on xuất cookie (vd. <i>cookies.txt</i>), đăng nhập rồi xuất file ngay trên điện thoại.</li>
+          <li><b>Tải nhanh:</b> trong TikTok / Facebook / Instagram / YouTube bấm <b>Chia sẻ → VidGrab</b> (sau khi đã cài app ra màn hình chính) hoặc <b>Chia sẻ → Termux</b>. VidGrab sẽ mở và tự phân tích link.</li>
+          <li>File lưu ở <b>Download/VidGrab</b>, xem bằng ứng dụng Tệp, Thư viện ảnh hoặc trình phát nhạc.</li>
+        </ul>
         <div class="label">Link mẫu được hỗ trợ</div>
         <table class="tbl">
           <tr><td>Instagram story</td><td><code>instagram.com/stories/&lt;username&gt;/</code> (tải toàn bộ story) hoặc <code>…/stories/&lt;user&gt;/&lt;id&gt;/</code></td></tr>
