@@ -18,23 +18,26 @@ android {
         targetSdk = 35
         versionCode = buildNumber
         versionName = "1.0.$buildNumber"
-        ndk {
-            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+    }
+
+    // Mỗi loại chip một APK cho nhẹ (đa số điện thoại hiện nay là arm64).
+    // Chaquopy cần ndk.abiFilters nên dùng product flavor thay cho "splits".
+    flavorDimensions += "abi"
+    productFlavors {
+        create("arm64") {
+            dimension = "abi"
+            ndk { abiFilters += "arm64-v8a" }
+        }
+        create("armv7") {
+            dimension = "abi"
+            ndk { abiFilters += "armeabi-v7a" }
+        }
+        create("x86_64") {
+            dimension = "abi"
+            ndk { abiFilters += "x86_64" }
         }
     }
 
-    // Mỗi loại chip một APK cho nhẹ (đa số điện thoại hiện nay là arm64-v8a)
-    splits {
-        abi {
-            isEnable = true
-            reset()
-            include("arm64-v8a", "armeabi-v7a", "x86_64")
-            isUniversalApk = false
-        }
-    }
-
-    // Khoá ký APK: KHÔNG lưu trong repo. Workflow GitHub tạo file khoá từ secret
-    // VIDGRAB_KEYSTORE_BASE64 (hoặc tạo khoá tạm) rồi truyền qua biến môi trường.
     signingConfigs {
         create("release") {
             storeFile = file(System.getenv("VIDGRAB_KEYSTORE_FILE") ?: "vidgrab-release.jks")

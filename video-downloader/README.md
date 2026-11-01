@@ -57,7 +57,7 @@ sudo apt install python3 python3-venv ffmpeg   # Debian/Ubuntu
 
 1. Trên điện thoại, mở trang **Releases** của repo:
    `https://github.com/khoapnaGH/f8-project-03/releases/latest`
-2. Tải **`VidGrab-arm64-v8a.apk`** (đa số điện thoại). Máy rất cũ thì dùng `VidGrab-armeabi-v7a.apk`.
+2. Tải **`VidGrab-arm64.apk`** (đa số điện thoại). Máy rất cũ thì dùng `VidGrab-armv7.apk`.
 3. Mở file vừa tải → cho phép **Cài ứng dụng không rõ nguồn gốc** nếu được hỏi → **Cài đặt**.
 4. Mở **VidGrab**. Lần đầu mất khoảng 10–30 giây để chuẩn bị. Bấm **Cho phép** thông báo để app tải tiếp khi bạn chuyển sang app khác.
 
