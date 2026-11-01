@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VidGrab · Tải video, story & phụ đề</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%237c5cff'/><stop offset='1' stop-color='%23ff4d8d'/></linearGradient></defs><rect width='64' height='64' rx='16' fill='url(%23g)'/><path d='M32 14v26m0 0-10-10m10 10 10-10M18 48h28' stroke='white' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="bg-orbs" aria-hidden="true"><span></span><span></span><span></span></div>
+
+  <!-- ================= HEADER ================= -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14" /></svg>
+      </div>
+      <div>
+        <div class="brand-name">VidGrab</div>
+        <div class="brand-sub">Video · Story · Phụ đề</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" id="btnFolder" title="Mở thư mục tải về">
+        <svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      </button>
+      <button class="icon-btn" id="btnGuide" title="Hướng dẫn tải nội dung riêng tư">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/></svg>
+      </button>
+      <button class="icon-btn" id="btnTheme" title="Đổi giao diện sáng/tối">
+        <svg class="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg>
+        <svg class="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <button class="btn btn-ghost" id="btnSettings">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        <span>Cài đặt</span>
+        <i class="dot" id="cookieDot" title="Đã nạp cookie"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- ================= HERO / INPUT ================= -->
+    <section class="hero">
+      <h1>Tải <span class="grad">video, story</span> &amp; <span class="grad">phụ đề</span><br/>chỉ với một đường link</h1>
+      <p class="lead">YouTube · Facebook · Instagram · TikTok — hỗ trợ cả nội dung riêng tư bằng cookie tài khoản của bạn.</p>
+
+      <div class="platforms">
+        <span class="pf pf-youtube"><svg viewBox="0 0 24 24"><path d="M23 7.2a3 3 0 0 0-2.1-2.1C19 4.6 12 4.6 12 4.6s-7 0-8.9.5A3 3 0 0 0 1 7.2 31 31 0 0 0 .5 12 31 31 0 0 0 1 16.8a3 3 0 0 0 2.1 2.1c1.9.5 8.9.5 8.9.5s7 0 8.9-.5a3 3 0 0 0 2.1-2.1 31 31 0 0 0 .5-4.8 31 31 0 0 0-.5-4.8zM9.7 15.1V8.9L15.5 12z"/></svg>YouTube</span>
+        <span class="pf pf-facebook"><svg viewBox="0 0 24 24"><path d="M24 12a12 12 0 1 0-13.9 11.9v-8.4h-3V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z"/></svg>Facebook</span>
+        <span class="pf pf-instagram"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.8.1 3.3.1 4.8 1.7 4.9 4.9.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 3.2-1.7 4.8-4.9 4.9-1.3.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-3.3-.1-4.8-1.7-4.9-4.9C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.8C2.4 3.9 3.9 2.4 7.2 2.3 8.4 2.2 8.8 2.2 12 2.2zM12 0C8.7 0 8.3 0 7.1.1 2.7.3.3 2.7.1 7.1 0 8.3 0 8.7 0 12s0 3.7.1 4.9c.2 4.4 2.6 6.8 7 7 1.2.1 1.6.1 4.9.1s3.7 0 4.9-.1c4.4-.2 6.8-2.6 7-7 .1-1.2.1-1.6.1-4.9s0-3.7-.1-4.9c-.2-4.4-2.6-6.8-7-7C15.7 0 15.3 0 12 0zm0 5.8a6.2 6.2 0 1 0 0 12.4 6.2 6.2 0 0 0 0-12.4zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.8a1.4 1.4 0 1 0 0 2.9 1.4 1.4 0 0 0 0-2.9z"/></svg>Instagram</span>
+        <span class="pf pf-tiktok"><svg viewBox="0 0 24 24"><path d="M12.5.02C13.8 0 15.1.01 16.4 0c.1 1.5.6 3.1 1.8 4.2 1.1 1.1 2.7 1.6 4.2 1.8v4c-1.4-.1-2.9-.4-4.2-1-.6-.3-1.1-.6-1.6-.9v8.6c-.1 1.4-.6 2.8-1.4 3.9-1.3 1.9-3.6 3.2-5.9 3.2-1.4.1-2.9-.3-4.1-1-2-1.2-3.4-3.4-3.6-5.7v-1.5c.2-1.9 1.1-3.7 2.6-5 1.7-1.4 4-2.1 6.1-1.7v4.3c-1-.3-2.2-.2-3.1.4-.6.4-1.1 1.1-1.4 1.8-.2.5-.2 1.1-.1 1.7.3 1.6 1.8 3 3.5 2.9 1.1 0 2.2-.7 2.8-1.6.2-.3.4-.7.4-1.1.1-1.8.1-3.5.1-5.3V.02z"/></svg>TikTok</span>
+        <span class="pf pf-more">+1800 trang khác</span>
+      </div>
+
+      <div class="input-card glass">
+        <div class="seg" role="tablist">
+          <button class="seg-btn active" data-input="single">Một link</button>
+          <button class="seg-btn" data-input="batch">Nhiều link</button>
+        </div>
+
+        <form id="formSingle" class="input-row" autocomplete="off">
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
+            <input id="urlInput" type="text" placeholder="Dán link video, reel, story, short… vào đây" spellcheck="false" />
+            <span class="detected" id="detected"></span>
+            <button type="button" class="paste-btn" id="btnPaste" title="Dán từ clipboard">
+              <svg viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/></svg>
+              Dán
+            </button>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg" id="btnAnalyze">
+            <span class="spinner"></span>
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <span class="lbl">Phân tích</span>
+          </button>
+        </form>
+
+        <form id="formBatch" class="batch hidden">
+          <textarea id="batchInput" rows="5" placeholder="Mỗi dòng một link…&#10;https://www.tiktok.com/@user/video/123&#10;https://www.instagram.com/reel/abc/&#10;https://youtu.be/xyz"></textarea>
+          <div class="batch-bar">
+            <div class="chips" id="batchMode">
+              <button type="button" class="chip active" data-v="video">🎬 Video tốt nhất</button>
+              <button type="button" class="chip" data-v="audio">🎵 MP3</button>
+              <button type="button" class="chip" data-v="subs">💬 Phụ đề</button>
+            </div>
+            <span class="muted" id="batchCount">0 link</span>
+            <button type="submit" class="btn btn-primary">
+              <svg viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
+              Tải tất cả
+            </button>
+          </div>
+        </form>
+
+        <div class="input-foot">
+          <label class="switch">
+            <input type="checkbox" id="useCookies" checked />
+            <span class="slider"></span>
+            <span>Dùng cookie đăng nhập (cho nội dung riêng tư / story)</span>
+          </label>
+          <span class="muted kbd-hint"><kbd>Ctrl</kbd>+<kbd>V</kbd> ở bất kỳ đâu để dán &amp; phân tích</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SKELETON ================= -->
+    <section id="skeleton" class="result glass hidden">
+      <div class="sk sk-thumb"></div>
+      <div class="sk-body">
+        <div class="sk sk-line w80"></div>
+        <div class="sk sk-line w40"></div>
+        <div class="sk sk-line w60"></div>
+        <div class="sk sk-block"></div>
+      </div>
+    </section>
+
+    <!-- ================= ERROR ================= -->
+    <section id="errorBox" class="error-box hidden">
+      <div class="err-icon">!</div>
+      <div>
+        <strong>Không phân tích được link</strong>
+        <pre id="errorText"></pre>
+        <div class="err-actions">
+          <button class="btn btn-ghost btn-sm" id="errCookie">Nạp cookie</button>
+          <button class="btn btn-ghost btn-sm" id="errGuide">Xem hướng dẫn</button>
+          <button class="btn btn-ghost btn-sm" id="errDirect">Vẫn thử tải trực tiếp</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= RESULT ================= -->
+    <section id="result" class="result glass hidden">
+      <div class="media">
+        <div class="thumb-wrap">
+          <img id="rThumb" alt="" />
+          <span class="badge-pf" id="rPlatform"></span>
+          <span class="badge-dur" id="rDuration"></span>
+        </div>
+        <div class="stats" id="rStats"></div>
+      </div>
+
+      <div class="details">
+        <h2 id="rTitle"></h2>
+        <div class="meta" id="rMeta"></div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-tab="video">
+            <svg viewBox="0 0 24 24"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="m17 10 5-3v10l-5-3"/></svg>Video
+          </button>
+          <button class="tab" data-tab="audio">
+            <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Âm thanh
+          </button>
+          <button class="tab" data-tab="subs">
+            <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M7 12h4M13 12h4M7 15h10"/></svg>Phụ đề <em class="count" id="subCount">0</em>
+          </button>
+          <button class="tab" data-tab="image">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>Ảnh bìa
+          </button>
+          <button class="tab hidden" data-tab="list" id="tabList">
+            <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Danh sách <em class="count" id="listCount">0</em>
+          </button>
+        </div>
+
+        <!-- VIDEO -->
+        <div class="panel active" data-panel="video">
+          <div class="label">Chất lượng</div>
+          <div class="quality-grid" id="qualityGrid"></div>
+          <div class="opts">
+            <label class="check"><input type="checkbox" id="optMp4" checked><span></span>Xuất MP4 (tương thích tốt)</label>
+            <label class="check"><input type="checkbox" id="optH264"><span></span>Ưu tiên H.264 (phát được trên mọi máy)</label>
+            <label class="check"><input type="checkbox" id="optMeta"><span></span>Ghi metadata</label>
+            <label class="check" id="optSubWrap"><input type="checkbox" id="optSubs"><span></span>Kèm phụ đề đã chọn ở tab Phụ đề</label>
+            <label class="check"><input type="checkbox" id="optEmbedSubs"><span></span>Nhúng phụ đề vào video</label>
+          </div>
+          <div class="action-bar">
+            <button class="btn btn-primary btn-lg" id="dlVideo">
+              <svg viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
+              Tải video <span class="q-label" id="qLabel"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- AUDIO -->
+        <div class="panel" data-panel="audio">
+          <div class="label">Định dạng</div>
+          <div class="chips" id="audioFmt">
+            <button class="chip active" data-v="mp3">MP3</button>
+            <button class="chip" data-v="m4a">M4A</button>
+            <button class="chip" data-v="opus">OPUS</button>
+            <button class="chip" data-v="flac">FLAC</button>
+            <button class="chip" data-v="wav">WAV</button>
+          </div>
+          <div class="label">Bitrate</div>
+          <div class="chips" id="audioQ">
+            <button class="chip" data-v="128">128 kbps</button>
+            <button class="chip active" data-v="192">192 kbps</button>
+            <button class="chip" data-v="320">320 kbps</button>
+          </div>
+          <div class="opts">
+            <label class="check"><input type="checkbox" id="optCover" checked><span></span>Gắn ảnh bìa vào file</label>
+            <label class="check"><input type="checkbox" id="optAMeta" checked><span></span>Ghi tên bài, tác giả</label>
+          </div>
+          <div class="action-bar">
+            <button class="btn btn-primary btn-lg" id="dlAudio">
+              <svg viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
+              Tải âm thanh
+            </button>
+          </div>
+        </div>
+
+        <!-- SUBS -->
+        <div class="panel" data-panel="subs">
+          <div class="subs-empty hidden" id="subsEmpty">
+            <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M7 12h4M13 12h4M7 15h10"/></svg>
+            <p>Video này không có phụ đề.</p>
+          </div>
+          <div id="subsWrap">
+            <div class="subs-toolbar">
+              <div class="search">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                <input id="subSearch" placeholder="Tìm ngôn ngữ… (vd: vi, Vietnamese, English)" />
+              </div>
+              <div class="chips" id="subFmt">
+                <button class="chip active" data-v="srt">SRT</button>
+                <button class="chip" data-v="vtt">VTT</button>
+                <button class="chip" data-v="txt">TXT</button>
+              </div>
+            </div>
+            <div class="sub-group" id="grpManual">
+              <div class="sub-head"><span>Phụ đề gốc (do người đăng tải lên)</span><em id="manCount"></em></div>
+              <div class="sub-list" id="subManual"></div>
+            </div>
+            <div class="sub-group" id="grpAuto">
+              <div class="sub-head"><span>Phụ đề tự động / dịch tự động</span><em id="autoCount"></em></div>
+              <div class="sub-list" id="subAuto"></div>
+              <button class="link-btn" id="subMore">Hiện tất cả ngôn ngữ</button>
+            </div>
+            <div class="action-bar">
+              <span class="muted" id="subSelInfo">Chưa chọn ngôn ngữ nào</span>
+              <button class="btn btn-primary" id="dlSubs">
+                <svg viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
+                Tải phụ đề đã chọn
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- IMAGE -->
+        <div class="panel" data-panel="image">
+          <p class="muted">Tải ảnh bìa (thumbnail) chất lượng cao nhất dưới dạng JPG.</p>
+          <div class="action-bar">
+            <button class="btn btn-primary" id="dlThumb">
+              <svg viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
+              Tải ảnh bìa
+            </button>
+            <a class="btn btn-ghost" id="openThumb" target="_blank" rel="noopener">Mở ảnh gốc</a>
+          </div>
+        </div>
+
+        <!-- PLAYLIST -->
+        <div class="panel" data-panel="list">
+          <div class="list-toolbar">
+            <label class="check"><input type="checkbox" id="selAll" checked><span></span>Chọn tất cả</label>
+            <span class="muted" id="selInfo"></span>
+          </div>
+          <div class="entry-list" id="entryList"></div>
+          <p class="muted small">Các mục được chọn sẽ được tải theo thiết lập ở tab Video / Âm thanh / Phụ đề.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= DOWNLOADS ================= -->
+    <section class="downloads">
+      <div class="dl-head">
+        <h3>
+          Danh sách tải
+          <span class="pill" id="activeCount">0 đang chạy</span>
+        </h3>
+        <div class="dl-tools">
+          <div class="chips small" id="jobFilter">
+            <button class="chip active" data-v="all">Tất cả</button>
+            <button class="chip" data-v="active">Đang tải</button>
+            <button class="chip" data-v="done">Hoàn tất</button>
+            <button class="chip" data-v="error">Lỗi</button>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="btnClear">Xoá mục đã xong</button>
+        </div>
+      </div>
+      <div id="jobList" class="job-list"></div>
+      <div class="empty" id="jobEmpty">
+        <svg viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
+        <p>Chưa có lượt tải nào. Dán một link ở trên để bắt đầu!</p>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <span>VidGrab chạy 100% trên máy của bạn · Dựa trên <a href="https://github.com/yt-dlp/yt-dlp" target="_blank" rel="noopener">yt-dlp</a></span>
+      <span class="muted" id="footVer"></span>
+    </footer>
+  </main>
+
+  <!-- ================= SETTINGS MODAL ================= -->
+  <div class="modal" id="modalSettings">
+    <div class="modal-card wide">
+      <div class="modal-head">
+        <h3>Cài đặt</h3>
+        <button class="icon-btn" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="tabs small">
+          <button class="tab active" data-stab="cookies">🍪 Cookie / Riêng tư</button>
+          <button class="tab" data-stab="general">⚙️ Chung</button>
+          <button class="tab" data-stab="system">🧩 Hệ thống</button>
+        </div>
+
+        <div class="spanel active" data-spanel="cookies">
+          <div class="note">
+            <strong>Tại sao cần cookie?</strong> Story, video riêng tư, nhóm kín, tài khoản private… chỉ xem được khi đăng nhập.
+            VidGrab dùng cookie của <u>chính tài khoản bạn</u> để tải những gì tài khoản đó <u>được phép xem</u>. Cookie chỉ lưu trên máy bạn.
+          </div>
+
+          <div class="label">Cách 1 · Nạp file cookies.txt (khuyên dùng)</div>
+          <div class="cookie-grid" id="cookieGrid"></div>
+
+          <div class="label">Cách 2 · Đọc cookie trực tiếp từ trình duyệt</div>
+          <div class="row">
+            <select id="setBrowser" class="select"></select>
+            <span class="muted small">Dùng khi chưa nạp file. Firefox hoạt động ổn định nhất; Chrome/Edge cần đóng trình duyệt trước khi tải.</span>
+          </div>
+        </div>
+
+        <div class="spanel" data-spanel="general">
+          <div class="label">Thư mục lưu</div>
+          <input id="setDir" class="text" />
+          <div class="label">Mẫu tên file</div>
+          <input id="setTmpl" class="text mono" />
+          <div class="muted small">Ví dụ: <code>%(uploader)s - %(title)s [%(id)s].%(ext)s</code> · Bỏ <code>[%(id)s]</code> nếu muốn tên gọn (file trùng tên sẽ bị ghi đè).</div>
+          <div class="row gap">
+            <div>
+              <div class="label">Số lượt tải cùng lúc</div>
+              <input id="setConc" type="number" min="1" max="10" class="text short" />
+            </div>
+            <label class="check mt"><input type="checkbox" id="setPerPf"><span></span>Tạo thư mục riêng cho từng nền tảng</label>
+          </div>
+        </div>
+
+        <div class="spanel" data-spanel="system">
+          <div class="sys-grid" id="sysInfo"></div>
+          <div class="row gap">
+            <button class="btn btn-ghost" id="btnUpdate">
+              <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg>
+              Cập nhật yt-dlp
+            </button>
+            <span class="muted small">Các mạng xã hội thay đổi liên tục — nếu tải lỗi hàng loạt, hãy cập nhật.</span>
+          </div>
+          <pre id="updateOut" class="out hidden"></pre>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" data-close>Đóng</button>
+        <button class="btn btn-primary" id="btnSaveSettings">Lưu cài đặt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= GUIDE MODAL ================= -->
+  <div class="modal" id="modalGuide">
+    <div class="modal-card wide">
+      <div class="modal-head">
+        <h3>Hướng dẫn tải nội dung riêng tư &amp; story</h3>
+        <button class="icon-btn" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      </div>
+      <div class="modal-body guide">
+        <ol class="steps">
+          <li>
+            <b>Cài extension xuất cookie</b> cho trình duyệt:
+            <a href="https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc" target="_blank" rel="noopener">Get cookies.txt LOCALLY</a> (Chrome/Edge/Cốc Cốc) hoặc
+            <a href="https://addons.mozilla.org/firefox/addon/cookies-txt/" target="_blank" rel="noopener">cookies.txt</a> (Firefox).
+          </li>
+          <li><b>Đăng nhập</b> Facebook / Instagram / TikTok / YouTube bằng tài khoản <u>có quyền xem</u> nội dung đó (đã follow, đã vào nhóm…).</li>
+          <li>Mở trang của nền tảng đó → bấm icon extension → <b>Export</b> → lưu file <code>.txt</code>.</li>
+          <li>Trong VidGrab: <b>Cài đặt → Cookie</b> → bấm <b>Nạp file</b> ở đúng nền tảng (hoặc kéo-thả file vào ô).</li>
+          <li>Dán link story / video riêng tư và bấm <b>Phân tích</b>. Xong!</li>
+        </ol>
+        <div class="label">Link mẫu được hỗ trợ</div>
+        <table class="tbl">
+          <tr><td>Instagram story</td><td><code>instagram.com/stories/&lt;username&gt;/</code> (tải toàn bộ story) hoặc <code>…/stories/&lt;user&gt;/&lt;id&gt;/</code></td></tr>
+          <tr><td>Instagram reel / post / highlight</td><td><code>instagram.com/reel/…</code>, <code>/p/…</code>, <code>/stories/highlights/&lt;id&gt;/</code></td></tr>
+          <tr><td>Facebook</td><td><code>facebook.com/…/videos/…</code>, <code>/reel/…</code>, <code>fb.watch/…</code>, <code>/watch/?v=</code>, video trong nhóm</td></tr>
+          <tr><td>TikTok</td><td><code>tiktok.com/@user/video/…</code>, <code>vt.tiktok.com/…</code>, link share (có kèm chữ cũng được)</td></tr>
+          <tr><td>YouTube</td><td>Video, Shorts, playlist, kênh, video không công khai / thành viên (cần cookie)</td></tr>
+        </table>
+        <div class="note warn">
+          <b>Lưu ý:</b> Chỉ tải nội dung bạn có quyền xem và tôn trọng bản quyền / quyền riêng tư của người khác.
+          Cookie đăng nhập giống như mật khẩu — không chia sẻ file cookie cho ai. Nên dùng tài khoản phụ để tránh bị khoá do tải quá nhiều.
+          Facebook story đôi khi không được yt-dlp hỗ trợ — khi đó hãy thử mở story, copy link video trực tiếp.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PREVIEW MODAL ================= -->
+  <div class="modal" id="modalPreview">
+    <div class="modal-card wide">
+      <div class="modal-head">
+        <h3 id="pvTitle">Xem trước</h3>
+        <div class="row">
+          <label class="check small hidden" id="pvTimeWrap"><input type="checkbox" id="pvTime"><span></span>Hiện thời gian</label>
+          <button class="btn btn-ghost btn-sm hidden" id="pvCopy">Sao chép</button>
+          <button class="btn btn-ghost btn-sm hidden" id="pvSave">Lưu .txt</button>
+          <button class="icon-btn" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </div>
+      </div>
+      <div class="modal-body" id="pvBody"></div>
+    </div>
+  </div>
+
+  <div class="drop-overlay" id="dropOverlay"><div>Thả link hoặc file cookies.txt vào đây</div></div>
+  <div class="toasts" id="toasts"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

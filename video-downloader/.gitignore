@@ -1,0 +1,6 @@
+cookies/
+settings.json
+history.json
+__pycache__/
+.venv/
+venv/
